@@ -85,3 +85,5 @@ urllib3==2.5.0
 uvicorn==0.40.0
 Werkzeug==3.1.5
 WTForms==3.0.1
+python-mailmerge==0.14
+secure-smtplib==0.1.1

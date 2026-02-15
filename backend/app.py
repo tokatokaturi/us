@@ -15,6 +15,7 @@ import datetime
 from utils import *;
 from models import db, User, Product, Cart, Order, OrderItem, Review, Coupon
 from flask_migrate import Migrate
+from email_service import EmailService
 
 
 
@@ -748,12 +749,14 @@ def create_app():
             order = Order(
                 user_id=user_id,
                 total=total,
-                shipping_address=data.get("shipping_address", "")
+                shipping_address=data.get("shipping_address", ""),
+                status="confirmed"
             )
             
             db.session.add(order)
             db.session.flush()
             
+            order_items_list = []
             for c in carts:
                 p = Product.query.get(c.product_id)
                 
@@ -768,10 +771,30 @@ def create_app():
                 
                 db.session.add(order_item)
                 p.stock -= c.quantity
+                order_items_list.append({
+                    "name": p.name,
+                    "quantity": c.quantity,
+                    "price": p.price,
+                    "total": p.price * c.quantity
+                })
             
             Cart.query.filter_by(user_id=user_id).delete()
             
             db.session.commit()
+            
+            # Send confirmation email
+            user = User.query.get(user_id)
+            email_service = EmailService()
+            email_service.send_order_confirmation(
+                user.email,
+                user.name,
+                order.id,
+                {
+                    "items": order_items_list,
+                    "total": total,
+                    "shipping_address": order.shipping_address
+                }
+            )
             
             return {
                 "msg": "Order created successfully",
@@ -881,15 +904,36 @@ def create_app():
                     })
                     
                     order.razorpay_payment_id = data.get("razorpay_payment_id")
-                    order.status = "processing"
+                    order.status = "confirmed"
                     
                     Cart.query.filter_by(user_id=user_id).delete()
                     
+                    order_items_list = []
                     for item in OrderItem.query.filter_by(order_id=order.id).all():
                         product = Product.query.get(item.product_id)
                         product.stock -= item.quantity
+                        order_items_list.append({
+                            "name": product.name,
+                            "quantity": item.quantity,
+                            "price": item.price,
+                            "total": item.price * item.quantity
+                        })
                     
                     db.session.commit()
+                    
+                    # Send confirmation email
+                    user = User.query.get(user_id)
+                    email_service = EmailService()
+                    email_service.send_order_confirmation(
+                        user.email,
+                        user.name,
+                        order.id,
+                        {
+                            "items": order_items_list,
+                            "total": order.total,
+                            "shipping_address": order.shipping_address
+                        }
+                    )
                     
                     return {"msg": "Payment verified successfully", "order_id": order.id}, 200
                 except Exception as e:
@@ -1155,6 +1199,86 @@ def create_app():
             return {"msg": "Profile updated successfully"}, 200
         except Exception as e:
             db.session.rollback()
+            return {"msg": str(e)}, 500
+    
+    # ================= ORDER HISTORY =================
+    
+    @app.route("/user/orders", methods=["GET"])
+    @jwt_required()
+    def get_user_orders():
+        try:
+            user_id = int(get_jwt_identity())
+            
+            orders = Order.query.filter_by(user_id=user_id).order_by(Order.created_at.desc()).all()
+            
+            data = []
+            for order in orders:
+                items = OrderItem.query.filter_by(order_id=order.id).all()
+                items_list = []
+                for item in items:
+                    product = Product.query.get(item.product_id)
+                    items_list.append({
+                        "id": item.id,
+                        "product_id": item.product_id,
+                        "product_name": product.name if product else "Unknown",
+                        "product_image": product.image if product else "",
+                        "quantity": item.quantity,
+                        "price": item.price,
+                        "color": item.color,
+                        "size": item.size
+                    })
+                
+                data.append({
+                    "id": order.id,
+                    "total": order.total,
+                    "status": order.status,
+                    "shipping_address": order.shipping_address,
+                    "created_at": order.created_at.isoformat(),
+                    "updated_at": order.updated_at.isoformat(),
+                    "items": items_list,
+                    "item_count": len(items_list)
+                })
+            
+            return jsonify(data), 200
+        except Exception as e:
+            return {"msg": str(e)}, 500
+    
+    @app.route("/user/order/<int:order_id>", methods=["GET"])
+    @jwt_required()
+    def get_order_details(order_id):
+        try:
+            user_id = int(get_jwt_identity())
+            
+            order = Order.query.get(order_id)
+            
+            if not order or order.user_id != user_id:
+                return {"msg": "Order not found"}, 404
+            
+            items = OrderItem.query.filter_by(order_id=order_id).all()
+            items_list = []
+            for item in items:
+                product = Product.query.get(item.product_id)
+                items_list.append({
+                    "id": item.id,
+                    "product_id": item.product_id,
+                    "product_name": product.name if product else "Unknown",
+                    "product_image": product.image if product else "",
+                    "quantity": item.quantity,
+                    "price": item.price,
+                    "color": item.color,
+                    "size": item.size
+                })
+            
+            return {
+                "id": order.id,
+                "total": order.total,
+                "status": order.status,
+                "shipping_address": order.shipping_address,
+                "created_at": order.created_at.isoformat(),
+                "updated_at": order.updated_at.isoformat(),
+                "items": items_list
+            }, 200
+        except Exception as e:
             return {"msg": str(e)}, 500
     
     # ================= HEALTH CHECK =================

@@ -1,0 +1,255 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Enterprise Black Theme Colors */
+  --background: 0 0% 5%;
+  --foreground: 0 0% 98%;
+  
+  /* Primary Colors - Black & White */
+  --primary: 0 0% 0%;
+  --primary-foreground: 0 0% 100%;
+  
+  /* Secondary Colors - Gold Accents */
+  --secondary: 42 100% 50%;
+  --secondary-foreground: 0 0% 0%;
+  
+  /* Neutral Colors */
+  --muted: 0 0% 25%;
+  --muted-foreground: 0 0% 85%;
+  
+  /* Accent Colors - Gold and White */
+  --accent: 42 100% 55%;
+  --accent-foreground: 0 0% 0%;
+  
+  /* Destructive */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  
+  /* Card */
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 98%;
+  
+  /* Input */
+  --input: 0 0% 15%;
+  
+  /* Border */
+  --border: 0 0% 20%;
+  
+  /* Ring */
+  --ring: 42 100% 55%;
+  
+  /* Popover */
+  --popover: 0 0% 10%;
+  --popover-foreground: 0 0% 98%;
+  
+  /* Custom Theme Colors */
+  --warm-beige: 42 89% 88%;
+  --warm-cream: 42 100% 95%;
+  --soft-taupe: 30 13% 35%;
+  --gold-accent: 42 100% 55%;
+  
+  /* Sidebar colors */
+  --sidebar-background: 0 0% 5%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 42 100% 55%;
+  --sidebar-primary-foreground: 0 0% 0%;
+  --sidebar-accent: 42 100% 55%;
+  --sidebar-accent-foreground: 0 0% 0%;
+  --sidebar-border: 0 0% 20%;
+  --sidebar-ring: 42 100% 55%;
+  
+  /* Radius */
+  --radius: 0.5rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  line-height: 1.2;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem;
+}
+
+h1 {
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 1.875rem;
+  font-weight: 700;
+}
+
+h4 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+h5 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+h6 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Typography */
+p {
+  margin-bottom: 1rem;
+}
+
+a {
+  color: hsl(var(--accent));
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: hsl(var(--secondary));
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent));
+}
+
+/* Input Styling */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: hsl(var(--accent));
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+/* Button Base Styles */
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Utility Classes */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.animate-slide-in-down {
+  animation: slideInDown 0.5s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.5s ease-out;
+}
+
+/* Responsive Spacing */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Selection color */
+::selection {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--primary));
+}
+
+::-moz-selection {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--primary));
+}
