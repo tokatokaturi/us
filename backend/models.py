@@ -14,6 +14,13 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     phone = db.Column(db.String(20), nullable=True)
     address = db.Column(db.Text, nullable=True)
+    city = db.Column(db.String(100), nullable=True)
+    state = db.Column(db.String(100), nullable=True)
+    country = db.Column(db.String(100), nullable=True)
+    postal_code = db.Column(db.String(20), nullable=True)
+    date_of_birth = db.Column(db.Date, nullable=True)
+    gender = db.Column(db.String(20), nullable=True)
+    last_cart_check_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -34,6 +41,12 @@ class Product(db.Model):
     description = db.Column(db.Text, default="")
     category = db.Column(db.String(100), default="")
     brand = db.Column(db.String(100), default="")
+    # Multiple categories: women, men, studio, new, unisex
+    is_women = db.Column(db.Boolean, default=False)
+    is_men = db.Column(db.Boolean, default=False)
+    is_studio = db.Column(db.Boolean, default=False)
+    is_new = db.Column(db.Boolean, default=False)
+    is_unisex = db.Column(db.Boolean, default=False)
     sku = db.Column(db.String(100), unique=True, index=True)
     status = db.Column(db.String(50), default="active")
 
@@ -126,6 +139,16 @@ class Cart(db.Model):
     quantity = db.Column(db.Integer, default=1)
     color = db.Column(db.String(50))
     size = db.Column(db.String(50))
+    email_sent = db.Column(db.Boolean, default=False)
+    email_sent_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Wishlist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 

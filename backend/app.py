@@ -13,7 +13,7 @@ import json
 import razorpay
 import datetime
 from utils import *;
-from models import db, User, Product, Cart, Order, OrderItem, Review, Coupon
+from models import db, User, Product, Cart, Order, OrderItem, Review, Coupon, Wishlist
 from flask_migrate import Migrate
 from email_service import EmailService
 
@@ -284,6 +284,13 @@ def create_app():
                 brand=data.get("brand", ""),
                 sku=data.get("sku", ""),
                 status=data.get("status", "active"),
+                
+                # Collection Categories
+                is_women=data.get("is_women", False),
+                is_men=data.get("is_men", False),
+                is_studio=data.get("is_studio", False),
+                is_new=data.get("is_new", False),
+                is_unisex=data.get("is_unisex", False),
                 
                 # Pricing
                 price=data.get("price"),

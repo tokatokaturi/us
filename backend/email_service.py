@@ -87,6 +87,66 @@ class EmailService:
             print(f"Error sending order confirmation email: {str(e)}")
             return False
     
+    def send_cart_abandonment(self, recipient_email, recipient_name, cart_items, cart_total):
+        """
+        Send cart abandonment email reminding user about items in their cart
+        """
+        try:
+            if not self.sender_email or not self.sender_password:
+                print("Email service not configured. Skipping email.")
+                return True
+            
+            subject = "You left something in your cart!"
+            
+            items_html = ""
+            for item in cart_items:
+                items_html += f"""
+                <div style="padding: 12px; margin: 10px 0; border: 1px solid #eee; border-radius: 4px; background: #f9f9f9;">
+                    <p style="margin: 0;"><strong>{item['name']}</strong></p>
+                    <p style="margin: 5px 0; color: #666; font-size: 14px;">Quantity: {item['quantity']}</p>
+                    <p style="margin: 5px 0; color: #666; font-size: 14px;">Price: ${item['price']:.2f}</p>
+                    {f"<p style='margin: 5px 0; color: #999; font-size: 12px;'>Color: {item['color']}</p>" if item.get('color') else ""}
+                    {f"<p style='margin: 5px 0; color: #999; font-size: 12px;'>Size: {item['size']}</p>" if item.get('size') else ""}
+                </div>
+                """
+            
+            body = f"""
+            <html>
+                <body style="font-family: Arial, sans-serif; color: #333;">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #1a1a1a;">You left something behind!</h2>
+                        
+                        <p>Hi {recipient_name},</p>
+                        
+                        <p>We noticed you have items in your cart. Don't miss out on these amazing products!</p>
+                        
+                        <h3 style="border-top: 2px solid #f0f0f0; padding-top: 20px;">Your Cart Items</h3>
+                        {items_html}
+                        
+                        <div style="border-top: 2px solid #f0f0f0; padding-top: 20px; margin-top: 20px;">
+                            <p style="font-size: 16px;">
+                                <strong>Cart Total: ${cart_total:.2f}</strong>
+                            </p>
+                        </div>
+                        
+                        <div style="margin: 30px 0; text-align: center;">
+                            <a href="http://localhost:3000/cart" style="background-color: #1a1a1a; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; display: inline-block;">Complete Your Purchase</a>
+                        </div>
+                        
+                        <div style="border-top: 2px solid #f0f0f0; padding-top: 20px; margin-top: 20px; color: #666; font-size: 12px;">
+                            <p>This is an automated reminder. If you have any questions, please contact our support team.</p>
+                        </div>
+                    </div>
+                </body>
+            </html>
+            """
+            
+            return self._send_email(recipient_email, subject, body)
+        
+        except Exception as e:
+            print(f"Error sending cart abandonment email: {str(e)}")
+            return False
+    
     def _send_email(self, recipient_email, subject, body):
         """
         Internal method to send email

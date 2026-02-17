@@ -33,7 +33,16 @@ export default function AddProduct() {
         warranty: "",
         returnPolicy: "",
         shippingClass: "",
+        // Collection categories
+        is_women: false,
+        is_men: false,
+        is_studio: false,
+        is_new: false,
+        is_unisex: false,
     });
+
+    const [customColorInput, setCustomColorInput] = useState("");
+    const [customSizeInput, setCustomSizeInput] = useState("");
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -115,6 +124,12 @@ export default function AddProduct() {
                 warranty: form.warranty,
                 returnPolicy: form.returnPolicy,
                 shippingClass: form.shippingClass,
+                // Collection categories
+                is_women: form.is_women,
+                is_men: form.is_men,
+                is_studio: form.is_studio,
+                is_new: form.is_new,
+                is_unisex: form.is_unisex,
             });
 
             alert("Product Added Successfully!");
@@ -153,7 +168,14 @@ export default function AddProduct() {
             warranty: "",
             returnPolicy: "",
             shippingClass: "",
+            is_women: false,
+            is_men: false,
+            is_studio: false,
+            is_new: false,
+            is_unisex: false,
         });
+        setCustomColorInput("");
+        setCustomSizeInput("");
         setActiveTab("basic");
     };
 
@@ -167,6 +189,13 @@ export default function AddProduct() {
         } else {
             setForm({ ...form, [field]: [...currentArray, value] });
         }
+    };
+
+    const toggleCategory = (category: "is_women" | "is_men" | "is_studio" | "is_new" | "is_unisex") => {
+        setForm({
+            ...form,
+            [category]: !form[category],
+        });
     };
 
     const addImage = () => {
@@ -363,12 +392,47 @@ export default function AddProduct() {
                                         </select>
                                     </div>
 
+                                    {/* Collection Categories */}
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-semibold mb-2 text-gray-900">
+                                            Collection Categories
+                                        </label>
+                                        <p className="text-xs text-gray-500 mb-3">Add this product to these collections:</p>
+                                        <div className="flex flex-wrap gap-3">
+                                            {[
+                                                { key: "is_women", label: "Women" },
+                                                { key: "is_men", label: "Men" },
+                                                { key: "is_studio", label: "Studio" },
+                                                { key: "is_new", label: "New" },
+                                                { key: "is_unisex", label: "Unisex" }
+                                            ].map(({ key, label }) => (
+                                                <label
+                                                    key={key}
+                                                    className={`flex items-center space-x-2 cursor-pointer px-4 py-2 rounded-lg border-2 transition-all ${
+                                                        form[key as keyof typeof form]
+                                                            ? "bg-black text-white border-black"
+                                                            : "bg-white border-gray-200 hover:border-gray-400"
+                                                    }`}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={form[key as keyof typeof form] as boolean}
+                                                        onChange={() => toggleCategory(key as any)}
+                                                        className="hidden"
+                                                    />
+                                                    <span className="text-sm font-medium">{label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
                                     {/* Colors */}
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-semibold mb-2 text-gray-900">
                                             Available Colors
                                         </label>
-                                        <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                                        <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 mb-3">
+                                            <p className="text-xs text-gray-500 mb-3">Select from presets or add custom colors:</p>
                                             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
                                                 {colorOptions.map((color) => (
                                                     <label
@@ -389,12 +453,50 @@ export default function AddProduct() {
                                                     </label>
                                                 ))}
                                             </div>
-                                            {form.colors.length > 0 && (
-                                                <div className="mt-3 text-sm text-gray-600">
-                                                    Selected: <span className="font-medium">{form.colors.join(", ")}</span>
-                                                </div>
-                                            )}
                                         </div>
+                                        {/* Custom Color Input */}
+                                        <div className="flex gap-2 mb-3">
+                                            <input
+                                                type="text"
+                                                placeholder="Add custom color (e.g., Rose Gold)"
+                                                className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                                value={customColorInput}
+                                                onChange={(e) => setCustomColorInput(e.target.value)}
+                                                onKeyPress={(e) => {
+                                                    if (e.key === "Enter" && customColorInput.trim()) {
+                                                        e.preventDefault();
+                                                        if (!form.colors.includes(customColorInput.trim())) {
+                                                            setForm({
+                                                                ...form,
+                                                                colors: [...form.colors, customColorInput.trim()]
+                                                            });
+                                                        }
+                                                        setCustomColorInput("");
+                                                    }
+                                                }}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (customColorInput.trim() && !form.colors.includes(customColorInput.trim())) {
+                                                        setForm({
+                                                            ...form,
+                                                            colors: [...form.colors, customColorInput.trim()]
+                                                        });
+                                                        setCustomColorInput("");
+                                                    }
+                                                }}
+                                                className="px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-medium"
+                                            >
+                                                <Plus className="w-4 h-4" />
+                                                Add
+                                            </button>
+                                        </div>
+                                        {form.colors.length > 0 && (
+                                            <div className="mt-3 text-sm text-gray-600">
+                                                Selected: <span className="font-medium">{form.colors.join(", ")}</span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Sizes */}
@@ -402,7 +504,8 @@ export default function AddProduct() {
                                         <label className="block text-sm font-semibold mb-2 text-gray-900">
                                             Available Sizes
                                         </label>
-                                        <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                                        <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 mb-3">
+                                            <p className="text-xs text-gray-500 mb-3">Select from presets or add custom sizes:</p>
                                             <div className="flex flex-wrap gap-3">
                                                 {sizeOptions.map((size) => (
                                                     <label
@@ -423,12 +526,50 @@ export default function AddProduct() {
                                                     </label>
                                                 ))}
                                             </div>
-                                            {form.sizes.length > 0 && (
-                                                <div className="mt-3 text-sm text-gray-600">
-                                                    Selected: <span className="font-medium">{form.sizes.join(", ")}</span>
-                                                </div>
-                                            )}
                                         </div>
+                                        {/* Custom Size Input */}
+                                        <div className="flex gap-2 mb-3">
+                                            <input
+                                                type="text"
+                                                placeholder="Add custom size (e.g., 32, Medium Tall)"
+                                                className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                                value={customSizeInput}
+                                                onChange={(e) => setCustomSizeInput(e.target.value)}
+                                                onKeyPress={(e) => {
+                                                    if (e.key === "Enter" && customSizeInput.trim()) {
+                                                        e.preventDefault();
+                                                        if (!form.sizes.includes(customSizeInput.trim())) {
+                                                            setForm({
+                                                                ...form,
+                                                                sizes: [...form.sizes, customSizeInput.trim()]
+                                                            });
+                                                        }
+                                                        setCustomSizeInput("");
+                                                    }
+                                                }}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (customSizeInput.trim() && !form.sizes.includes(customSizeInput.trim())) {
+                                                        setForm({
+                                                            ...form,
+                                                            sizes: [...form.sizes, customSizeInput.trim()]
+                                                        });
+                                                        setCustomSizeInput("");
+                                                    }
+                                                }}
+                                                className="px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-medium"
+                                            >
+                                                <Plus className="w-4 h-4" />
+                                                Add
+                                            </button>
+                                        </div>
+                                        {form.sizes.length > 0 && (
+                                            <div className="mt-3 text-sm text-gray-600">
+                                                Selected: <span className="font-medium">{form.sizes.join(", ")}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}

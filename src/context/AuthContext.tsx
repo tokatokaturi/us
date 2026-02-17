@@ -12,10 +12,12 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
+  isGuest: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string, phone?: string) => Promise<void>;
+  signup: (userData: any) => Promise<void>;
   googleLogin: (googleId: string, email: string, name: string) => Promise<void>;
   logout: () => void;
+  setGuest: (guest: boolean) => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
 }
@@ -26,6 +28,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -106,18 +109,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const signup = async (name: string, email: string, password: string, phone?: string) => {
+  const signup = async (userData: any) => {
     try {
       const response = await fetch(`${API_BASE_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, password, phone }),
+        body: JSON.stringify(userData),
       });
 
       if (!response.ok) {
-        throw new Error('Signup failed');
+        const error = await response.json();
+        throw new Error(error.msg || 'Signup failed');
       }
 
       const data = await response.json();
@@ -125,12 +129,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setToken(data.token);
       setUser({
         id: data.user_id,
-        email: email,
-        name: name,
+        email: userData.email,
+        name: userData.name,
         is_admin: false,
       });
       
-      Cookies.set('auth_token', data.token, { expires: 7 });
+      // Set cookie with 30 days expiration
+      Cookies.set('auth_token', data.token, { expires: 30, sameSite: 'Lax' });
+      setIsGuest(false);
     } catch (error) {
       throw error;
     }
@@ -169,17 +175,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = () => {
     setUser(null);
     setToken(null);
+    setIsGuest(false);
     Cookies.remove('auth_token');
+  };
+
+  const setGuestMode = (guest: boolean) => {
+    setIsGuest(guest);
+    if (!guest) {
+      setIsGuest(false);
+    }
   };
 
   const value: AuthContextType = {
     user,
     token,
     isLoading,
+    isGuest,
     login,
     signup,
     googleLogin,
     logout,
+    setGuest: setGuestMode,
     isAuthenticated: !!user,
     isAdmin: user?.is_admin || false,
   };
